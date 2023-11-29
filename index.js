@@ -12,13 +12,13 @@ exports.handler = async (event) => {
     const {email, submission_url, assignment_id, account_id} = message;
   
     //store to bucket
-    const status = await storeToBucket(submission_url, assignment_id, account_id);
+    const { res, signedUrl } = await storeToBucket(submission_url, assignment_id, account_id);
   
     //send mail
-    await sendMail(email, status);
+    await sendMail(email, res, signedUrl);
 
     //send data to dynamodb
-    await storeToDynamo(email, status === 'success' ? 'success' : 'failed');
+    await storeToDynamo(email, res === 'success' ? 'success' : 'failed');
   
     response = {
       statusCode: 200,
