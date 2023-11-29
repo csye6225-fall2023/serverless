@@ -5,6 +5,7 @@ const decodeKey = require('../utils/decode-key');
 //Download and store to gcp bucket
 const storeToBucket = async (submission_url, assignment_id, account_id) => {
     let res = null;
+    let signedUrl = null;
     try {
         //download file
         const asset = await fetch(submission_url);
@@ -19,7 +20,19 @@ const storeToBucket = async (submission_url, assignment_id, account_id) => {
             });
 
             //store to bucket
-            await storage.bucket(process.env.gcpBucketName).file(`${account_id}/${assignment_id}/assignment-submission-${new Date().toString()}.zip`).save(data);
+            const file = `${account_id}/${assignment_id}/assignment-submission-${new Date().toString()}.zip`
+            await storage.bucket(process.env.gcpBucketName).file(file).save(data);
+            
+            // Generate the signed URL
+            const [url] = await storage
+                            .bucket(process.env.gcpBucketName)
+                            .file(file)
+                            .getSignedUrl({
+                                action: 'read',
+                                expires: Date.now() + 15 * 60 * 1000, // 15 minutes
+                            });
+            signedUrl = url;
+   
             res = 'success';
         } else {
             res = "Upload to bucket failed, Reason: Didn't get a valid response from the url";
@@ -29,7 +42,10 @@ const storeToBucket = async (submission_url, assignment_id, account_id) => {
         res = 'Upload to bucket failed, Reason: ' + e.message;
     }
 
-    return res;
+    return {
+        res,
+        signedUrl,
+    };
 };
 
 
