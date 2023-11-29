@@ -2,7 +2,6 @@ const formData = require('form-data');
 const MailGun = require('mailgun.js');
 
 const sendMail = async (to, status) => {
-    let res = null;
     try {
         const mailgun = new MailGun(formData);
         const mg = mailgun.client({
@@ -14,19 +13,14 @@ const sendMail = async (to, status) => {
             from: process.env.mailgunFrom,
             to,
             subject: 'Download Status',
-            text: `Your download status is ${status}`,
+            text: `Your download status:\n ${status}`,
         };
     
         //send mail
         await mg.messages.create(process.env.mailgunDomain, mailData);
-
-        res = 'success';
     } catch (e) {
         console.log(e);
-        res = 'failure';
     }
-
-    return res;
 }
 
 module.exports = sendMail;

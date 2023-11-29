@@ -3,25 +3,30 @@ const fetch = require('node-fetch');
 const decodeKey = require('../utils/decode-key');
 
 //Download and store to gcp bucket
-const storeToBucket = async (submission_url, assignment_id) => {
+const storeToBucket = async (submission_url, assignment_id, account_id) => {
     let res = null;
     try {
         //download file
         const asset = await fetch(submission_url);
-        const data = asset.buffer();
-    
-        //configure storage
-        const storage = new Storage({
-            projectId: process.env.projectId,
-            credentials: decodeKey(),
-        });
 
-        //store to bucket
-        await storage.bucket(process.env.gcpBucketName).file(`${assignment_id}/assignment-submission-${new Date().toString()}.zip`).save(data);
-        res = 'success';
+        if(asset.ok) {
+            const data = asset.buffer();
+        
+            //configure storage
+            const storage = new Storage({
+                projectId: process.env.projectId,
+                credentials: decodeKey(),
+            });
+
+            //store to bucket
+            await storage.bucket(process.env.gcpBucketName).file(`${account_id}/${assignment_id}/assignment-submission-${new Date().toString()}.zip`).save(data);
+            res = 'success';
+        } else {
+            res = "Upload to bucket failed, Reason: Didn't get a valid response from the url";
+        }
     } catch (e) {
         console.log(e);
-        res = 'failure';
+        res = 'Upload to bucket failed, Reason: ' + e.message;
     }
 
     return res;
