@@ -10,7 +10,7 @@ const storeToDynamo = async (email, status) => {
             Item: {
                 id: Date.now().toString(),
                 status,
-                timestamp: Date.now().toString(),
+                timestamp: new Date().toISOString(),
                 email,
             },
         };
