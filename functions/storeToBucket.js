@@ -23,15 +23,7 @@ const storeToBucket = async (submission_url, assignment_id, account_id) => {
             const file = `${account_id}/${assignment_id}/assignment-submission-${new Date().toString()}.zip`
             await storage.bucket(process.env.gcpBucketName).file(file).save(data);
             
-            // Generate the signed URL
-            const [url] = await storage
-                            .bucket(process.env.gcpBucketName)
-                            .file(file)
-                            .getSignedUrl({
-                                action: 'read',
-                                expires: Date.now() + 15 * 60 * 1000, // 15 minutes
-                            });
-            signedUrl = url;
+            signedUrl = file;
    
             res = 'success';
         } else {
@@ -39,7 +31,7 @@ const storeToBucket = async (submission_url, assignment_id, account_id) => {
         }
     } catch (e) {
         console.log(e);
-        res = 'Upload to bucket failed, Reason: ' + e.message;
+        res = 'Upload to bucket failed, Reason: The specified domain name does not exist';
     }
 
     return {

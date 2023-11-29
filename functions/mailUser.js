@@ -9,8 +9,8 @@ const sendMail = async (to, status, signedUrl) => {
         key: process.env.mailgunApiKey,
         });
 
-        let text = `Your download status:\n ${status}`;
-        text += signedUrl ? `\nDownload link: ${signedUrl}` : '';
+        let text = `Your download status: ${status}`;
+        text += signedUrl ? `\nPath to your file in your bucket: ${signedUrl}` : '';
     
         const mailData = {
             from: process.env.mailgunFrom,
